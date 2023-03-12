@@ -10,7 +10,6 @@ import (
 	"regexp"
 	"schoolapi/controllers"
 	"schoolapi/initialisers"
-	"schoolapi/models"
 	"testing"
 	"time"
 
@@ -21,7 +20,6 @@ import (
 
 func init() {
 	initialisers.LoadEnvVariables()
-	// initialisers.ConnectToDB()
 }
 
 func SetUpRouter() *gin.Engine {
@@ -33,21 +31,14 @@ func TestCommonStudents(t *testing.T) {
 	initialisers.InitialiseMockDb(t)
 	defer initialisers.MockDB.Close()
 
-	students := []models.Student{
-		{Email: "studentmary@gmail.com", Suspended: false},
-		{Email: "studentbob@gmail.com", Suspended: false},
-		{Email: "commonstudent1@gmail.com", Suspended: false},
-		{Email: "commonstudent2@gmail.com", Suspended: false},
-	}
-
 	initialisers.Mock.ExpectQuery(regexp.QuoteMeta(`as relevant_teachers FROM`)).
 		WillReturnRows(sqlmock.NewRows([]string{"email", "relevant_teachers"}).
-			AddRow(students[0].Email, 2).
-			AddRow(students[1].Email, 2).
-			AddRow(students[2].Email, 2).
-			AddRow(students[3].Email, 2))
-
+			AddRow("studentmary@gmail.com", 2).
+			AddRow("studentbob@gmail.com", 2).
+			AddRow("commonstudent1@gmail.com", 2).
+			AddRow("commonstudent2@gmail.com", 2))
 	mockResponse := `{"students":["studentmary@gmail.com","studentbob@gmail.com","commonstudent1@gmail.com","commonstudent2@gmail.com"]}`
+
 	r := SetUpRouter()
 	r.GET("/api/commonstudents", controllers.GetCommonStudents)
 	req, err := http.NewRequest("GET", `http://127.0.0.1:`+os.Getenv("PORT")+`/api/commonstudents?teacher=teacherken%40gmail.com&teacher=teacherjoe%40gmail.com`, nil)
