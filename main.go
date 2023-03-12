@@ -13,6 +13,7 @@ func init() {
 }
 
 func main() {
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	r.GET("/api/commonstudents", controllers.GetCommonStudents)
 	r.POST("/api/register", controllers.RegisterStudents)
